@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Class results in one click</h1>
+  <p>Upload your class marks sheet and get totals, percentages, grades, pass/fail,
+     class statistics, charts and printable report cards.</p>
+</section>
+
+<div class="grid-2">
+  <form class="card" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+    <h2>1. Upload marks file</h2>
+    <label class="field">
+      <span>Excel file (.xlsx)</span>
+      <input type="file" name="file" accept=".xlsx">
+    </label>
+
+    <h2>2. Rules</h2>
+    <label class="field">
+      <span>Pass percentage</span>
+      <input type="number" name="pass_pct" value="{{ default_pass }}" min="1" max="100" step="0.5">
+    </label>
+    <label class="check">
+      <input type="checkbox" name="per_subject">
+      Student must also pass <b>every</b> subject
+    </label>
+
+    <div class="actions">
+      <button class="btn primary" type="submit">Calculate results</button>
+      {% if sample_available %}
+        <button class="btn" type="submit" name="use_sample" value="1">Try with sample data</button>
+      {% endif %}
+    </div>
+  </form>
+
+  <div class="card">
+    <h2>Expected file format</h2>
+    <p>The sheet needs these column headers (title rows above the header are fine):</p>
+    <div class="chips">
+      <span class="chip">RollNo</span><span class="chip">Name</span>
+      {% for s in subjects %}<span class="chip">{{ s }}</span>{% endfor %}
+    </div>
+    <p class="muted">Marks are out of 100 per subject. Any existing Total / Percentage /
+       Grade / Result columns are ignored and recalculated.</p>
+    <h2>Grade scale</h2>
+    <table class="mini">
+      <tr><td>A+</td><td>90% and above</td><td>B</td><td>60 – 69%</td></tr>
+      <tr><td>A</td><td>80 – 89%</td><td>C</td><td>50 – 59%</td></tr>
+      <tr><td>B+</td><td>70 – 79%</td><td>D</td><td>pass mark – 49%</td></tr>
+      <tr><td colspan="2"></td><td>F</td><td>below pass mark</td></tr>
+    </table>
+  </div>
+</div>
+{% endblock %}

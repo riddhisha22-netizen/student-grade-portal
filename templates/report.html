@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ s.Name }} · Report card{% endblock %}
+{% block content %}
+<div class="head-row no-print">
+  <a class="btn" href="{{ url_for('results', token=token) }}">← Back to results</a>
+  <button class="btn primary" onclick="window.print()">🖨 Print report card</button>
+</div>
+
+<div class="card report">
+  <div class="report-head">
+    <div>
+      <h1>Report Card</h1>
+      <p class="muted">{{ a.filename }}</p>
+    </div>
+    <div class="result-box {{ s.Result|lower }}">{{ s.Result }}</div>
+  </div>
+
+  <div class="info">
+    <div><span>Name</span><b>{{ s.Name }}</b></div>
+    <div><span>Roll No</span><b>{{ s.RollNo }}</b></div>
+    <div><span>Class rank</span><b>{{ s.Rank }} / {{ total_students }}</b></div>
+    <div><span>Grade</span><b><span class="badge g-{{ s.Grade|replace('+','p') }}">{{ s.Grade }}</span></b></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Subject</th><th>Marks</th><th>Out of</th><th>Class average</th><th>Compared to class</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for sub in subjects %}
+        {% set diff = s[sub] - avg[sub] %}
+        <tr>
+          <td>{{ sub }}</td>
+          <td><b>{{ "%g"|format(s[sub]) }}</b></td>
+          <td>{{ max_marks }}</td>
+          <td>{{ "%g"|format(avg[sub]) }}</td>
+          <td class="{{ 'up' if diff >= 0 else 'down' }}">{{ '+' if diff >= 0 else '' }}{{ "%.1f"|format(diff) }}</td>
+          <td class="meter"><div style="width: {{ (s[sub] / max_marks * 100)|round(1) }}%"></div></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Total</td><td><b>{{ "%g"|format(s.Total) }}</b></td>
+        <td>{{ max_marks * subjects|length }}</td><td colspan="3"><b>{{ "%g"|format(s.Percentage) }}%</b></td>
+      </tr>
+    </tfoot>
+  </table>
+  <p class="muted">Pass mark: {{ "%g"|format(a.pass_pct) }}%{% if a.per_subject %} (and every subject){% endif %}.</p>
+</div>
+{% endblock %}
