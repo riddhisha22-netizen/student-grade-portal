@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Results · Student Grade Portal{% endblock %}
+{% block content %}
+{% set st = a.stats %}
+<div class="head-row">
+  <div>
+    <h1>Class results</h1>
+    <p class="muted">File: {{ a.filename }} · Pass mark {{ "%g"|format(a.pass_pct) }}%{% if a.per_subject %} · must pass every subject{% endif %}</p>
+  </div>
+  <div class="actions no-print">
+    <a class="btn primary" href="{{ url_for('download', token=token, kind='excel') }}">⬇ Excel</a>
+    <a class="btn" href="{{ url_for('download', token=token, kind='csv') }}">⬇ CSV</a>
+    <a class="btn" href="{{ url_for('download', token=token, kind='chart') }}">⬇ Chart</a>
+    <a class="btn" href="{{ url_for('index') }}">New upload</a>
+  </div>
+</div>
+
+{% for w in a.warnings %}<div class="alert warn">{{ w }}</div>{% endfor %}
+
+<section class="stats">
+  <div class="stat"><span>Students</span><b>{{ st["Number of Students"] }}</b></div>
+  <div class="stat"><span>Class average</span><b>{{ "%g"|format(st["Class Average %"]) }}%</b></div>
+  <div class="stat"><span>Highest</span><b>{{ "%g"|format(st["Highest %"]) }}%</b></div>
+  <div class="stat"><span>Lowest</span><b>{{ "%g"|format(st["Lowest %"]) }}%</b></div>
+  <div class="stat good"><span>Passed</span><b>{{ st["Pass Count"] }}</b></div>
+  <div class="stat bad"><span>Failed</span><b>{{ st["Fail Count"] }}</b></div>
+  <div class="stat"><span>Pass rate</span><b>{{ "%g"|format(st["Pass %"]) }}%</b></div>
+  <div class="stat"><span>Topper</span><b class="small">{{ st["Class Topper"] }}</b></div>
+</section>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>🏆 Top performers</h2>
+    <ol class="top">
+      {% for t in a.top3 %}
+        <li><span>{{ t.Name }}</span><span><b>{{ "%g"|format(t.Percentage) }}%</b> <span class="badge g-{{ t.Grade|replace('+','p') }}">{{ t.Grade }}</span></span></li>
+      {% endfor %}
+    </ol>
+  </div>
+  <div class="card">
+    <h2>Grade distribution</h2>
+    {% set mx = a.grade_counts.max() or 1 %}
+    {% for g, n in a.grade_counts.items() %}
+      <div class="bar-row">
+        <span class="badge g-{{ g|replace('+','p') }}">{{ g }}</span>
+        <div class="bar"><div style="width: {{ (n / mx * 100)|round(1) }}%"></div></div>
+        <span class="count">{{ n }}</span>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h2>Charts</h2>
+  <img class="chart" alt="Class performance charts" src="data:image/png;base64,{{ a.chart }}">
+</div>
+
+<div class="card">
+  <div class="head-row">
+    <h2>Student results</h2>
+    <div class="filters no-print">
+      <input id="search" type="search" placeholder="Search name or roll no…">
+      <select id="resultFilter">
+        <option value="">All</option><option>Pass</option><option>Fail</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Rank</th><th>Roll</th><th>Name</th>
+          {% for s in subjects %}<th>{{ s }}</th>{% endfor %}
+          <th>Total</th><th>%</th><th>Grade</th><th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i, r in a.df.iterrows() %}
+        <tr class="{{ 'fail' if r.Result == 'Fail' else '' }}" data-result="{{ r.Result }}">
+          <td>{{ r.Rank }}</td>
+          <td>{{ r.RollNo }}</td>
+          <td><a href="{{ url_for('report', token=token, idx=i) }}">{{ r.Name }}</a></td>
+          {% for s in subjects %}<td>{{ "%g"|format(r[s]) }}</td>{% endfor %}
+          <td>{{ "%g"|format(r.Total) }}</td>
+          <td>{{ "%g"|format(r.Percentage) }}</td>
+          <td><span class="badge g-{{ r.Grade|replace('+','p') }}">{{ r.Grade }}</span></td>
+          <td><span class="pill {{ r.Result|lower }}">{{ r.Result }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="muted no-print">Click a student's name to open their report card.</p>
+</div>
+
+<div class="card">
+  <h2>Subject-wise class average</h2>
+  <div class="table-wrap">
+    <table class="mini">
+      <tr>{% for s in subjects %}<th>{{ s }}</th>{% endfor %}</tr>
+      <tr>{% for s in subjects %}<td>{{ "%g"|format(a.subject_avg[s]) }}</td>{% endfor %}</tr>
+    </table>
+  </div>
+</div>
+
+<script>
+  const search = document.getElementById("search");
+  const filter = document.getElementById("resultFilter");
+  const rows = document.querySelectorAll("#resultsTable tbody tr");
+  function applyFilters() {
+    const q = search.value.trim().toLowerCase();
+    const res = filter.value;
+    rows.forEach(tr => {
+      const text = tr.textContent.toLowerCase();
+      const ok = (!q || text.includes(q)) && (!res || tr.dataset.result === res);
+      tr.style.display = ok ? "" : "none";
+    });
+  }
+  search.addEventListener("input", applyFilters);
+  filter.addEventListener("change", applyFilters);
+</script>
+{% endblock %}
