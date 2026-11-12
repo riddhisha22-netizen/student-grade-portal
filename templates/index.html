@@ -1,54 +1,298 @@
-
 {% extends "base.html" %}
+{% block title %}Student Grade Portal | Performance Made Simple{% endblock %}
 {% block content %}
-<section class="hero">
-  <h1>Class results in one click</h1>
-  <p>Upload your class marks sheet and get totals, percentages, grades, pass/fail,
-     class statistics, charts and printable report cards.</p>
-</section>
-
-<div class="grid-2">
-  <form class="card" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
-    <h2>1. Upload marks file</h2>
-    <label class="field">
-      <span>Excel file (.xlsx)</span>
-      <input type="file" name="file" accept=".xlsx">
-    </label>
-
-    <h2>2. Rules</h2>
-    <label class="field">
-      <span>Pass percentage</span>
-      <input type="number" name="pass_pct" value="{{ default_pass }}" min="1" max="100" step="0.5">
-    </label>
-    <label class="check">
-      <input type="checkbox" name="per_subject">
-      Student must also pass <b>every</b> subject
-    </label>
-
-    <div class="actions">
-      <button class="btn primary" type="submit">Calculate results</button>
-      {% if sample_available %}
-        <button class="btn" type="submit" name="use_sample" value="1">Try with sample data</button>
-      {% endif %}
+<div class="home-page">
+  <section class="home-hero">
+    <div class="hero-content">
+      <span class="welcome-tag">SMART • SIMPLE • STUDENT PERFORMANCE</span>
+      <h1>Student Performance<br><span>Made Simple.</span></h1>
+      <p>Turn your class marksheet into clear results, useful insights and individual report cards. Upload your Excel file and let the portal handle the calculations.</p>
+      <a class="hero-button" href="#workspace">Get started <span>→</span></a>
     </div>
-  </form>
-
-  <div class="card">
-    <h2>Expected file format</h2>
-    <p>The sheet needs these column headers (title rows above the header are fine):</p>
-    <div class="chips">
-      <span class="chip">RollNo</span><span class="chip">Name</span>
-      {% for s in subjects %}<span class="chip">{{ s }}</span>{% endfor %}
+    <div class="hero-visual" aria-hidden="true">
+      <div class="floating-card float-one">↗ Class insights</div>
+      <div class="visual-card">
+        <div class="visual-icon">📊</div>
+        <span>CLASS PERFORMANCE</span>
+        <strong>Results at a glance</strong>
+        <div class="visual-bars">
+          <i style="height:42%"></i><i style="height:65%"></i><i style="height:52%"></i><i style="height:86%"></i><i style="height:72%"></i>
+        </div>
+        <small>Understand progress with clear visuals</small>
+      </div>
+      <div class="floating-card float-two">✓ Reports ready to download</div>
     </div>
-    <p class="muted">Marks are out of 100 per subject. Any existing Total / Percentage /
-       Grade / Result columns are ignored and recalculated.</p>
-    <h2>Grade scale</h2>
-    <table class="mini">
-      <tr><td>A+</td><td>90% and above</td><td>B</td><td>60 – 69%</td></tr>
-      <tr><td>A</td><td>80 – 89%</td><td>C</td><td>50 – 59%</td></tr>
-      <tr><td>B+</td><td>70 – 79%</td><td>D</td><td>pass mark – 49%</td></tr>
-      <tr><td colspan="2"></td><td>F</td><td>below pass mark</td></tr>
-    </table>
-  </div>
+  </section>
+
+  <section class="dashboard-preview" aria-labelledby="previewTitle">
+    <div class="preview-heading">
+      <div>
+        <span class="section-eyebrow">A QUICK LOOK INSIDE</span>
+        <h2 id="previewTitle">Your class dashboard, made clearer</h2>
+        <p>Explore a sample dashboard to see how your results will be organised after calculation.</p>
+      </div>
+      <span class="preview-demo-label">SAMPLE PREVIEW</span>
+    </div>
+    <div class="preview-tabs" role="group" aria-label="Dashboard preview views">
+      <button type="button" class="preview-tab is-active" data-view="overview" aria-pressed="true">Overview</button>
+      <button type="button" class="preview-tab" data-view="grades" aria-pressed="false">Grade mix</button>
+      <button type="button" class="preview-tab" data-view="subjects" aria-pressed="false">Subjects</button>
+    </div>
+    <div class="preview-dashboard" aria-live="polite">
+      <div class="preview-metrics">
+        <article class="preview-metric"><span>Students assessed</span><strong data-metric="students">120</strong><small>Class size</small></article>
+        <article class="preview-metric"><span>Class average</span><strong data-metric="average">76.4%</strong><small>Overall performance</small></article>
+        <article class="preview-metric"><span>Pass rate</span><strong data-metric="pass">92%</strong><small>Students passed</small></article>
+      </div>
+      <div class="preview-chart-card">
+        <div class="preview-chart-top"><div><strong id="previewChartTitle">Performance snapshot</strong><p id="previewChartHint">Illustrative class average across key areas</p></div><span class="chart-key"><i></i> Average</span></div>
+        <div class="preview-bars" id="previewBars" role="img" aria-label="Sample performance chart">
+          <div class="preview-bar-item"><div class="preview-bar-track"><i style="height:76%"></i></div><span>English</span></div>
+          <div class="preview-bar-item"><div class="preview-bar-track"><i style="height:68%"></i></div><span>Maths</span></div>
+          <div class="preview-bar-item"><div class="preview-bar-track"><i style="height:82%"></i></div><span>Science</span></div>
+          <div class="preview-bar-item"><div class="preview-bar-track"><i style="height:88%"></i></div><span>Computer</span></div>
+          <div class="preview-bar-item"><div class="preview-bar-track"><i style="height:70%"></i></div><span>Hindi</span></div>
+        </div>
+        <div class="preview-chart-foot"><span>0%</span><span>Sample data for demonstration only</span><span>100%</span></div>
+      </div>
+    </div>
+    <p class="preview-note">Your actual dashboard is generated from the Excel file you upload — these figures are only an example.</p>
+  </section>
+
+  <section class="home-features" aria-label="Portal features">
+    <article class="feature-card feature-blue">
+      <div class="feature-icon">📁</div>
+      <h3>Easy Excel Upload</h3>
+      <p>Upload your class marksheet in .xlsx format.</p>
+    </article>
+    <article class="feature-card feature-purple">
+      <div class="feature-icon">🧮</div>
+      <h3>Automatic Grading</h3>
+      <p>Calculate totals, percentages, grades and results.</p>
+    </article>
+    <article class="feature-card feature-orange">
+      <div class="feature-icon">📈</div>
+      <h3>Class Insights</h3>
+      <p>Explore class statistics and performance charts.</p>
+    </article>
+    <article class="feature-card feature-green">
+      <div class="feature-icon">📄</div>
+      <h3>Student Reports</h3>
+      <p>View printable report cards and export results.</p>
+    </article>
+  </section>
+
+  <section id="workspace">
+    <div class="workspace-heading">
+      <div>
+        <span class="section-eyebrow">YOUR WORKSPACE</span>
+        <h2>Let's calculate your results</h2>
+        <p>Follow the steps below to analyse your class performance.</p>
+      </div>
+      <span class="workspace-status">● Ready to process</span>
+    </div>
+
+    <form id="uploadForm" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+      <div class="home-workspace">
+        <section class="home-panel">
+          <div class="panel-heading">
+            <span class="step-number">01</span>
+            <div>
+              <h3>Upload your marksheet</h3>
+              <p>Choose an Excel workbook from your device.</p>
+            </div>
+          </div>
+
+          <label class="upload-zone" id="uploadZone" for="excelFile">
+            <span class="upload-symbol">☁️</span>
+            <strong>Drag and drop your Excel file here</strong>
+            <span>or browse files from your computer</span>
+            <span class="upload-helper">Your original spreadsheet is not changed.</span>
+            <span class="browse-label">Browse files</span>
+            <small>Supported format: .xlsx • Maximum size: 5 MB</small>
+            <input id="excelFile" type="file" name="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+          </label>
+          <div class="selected-file" id="selectedFile" aria-live="polite">
+            <span>📄</span><span id="fileName">No file selected</span>
+            <button type="button" id="clearFile" aria-label="Remove selected file">×</button>
+          </div>
+
+          <div class="settings-heading">
+            <span class="step-number">02</span>
+            <div>
+              <h3>Set grading preferences</h3>
+              <p>Choose the pass criteria for this analysis.</p>
+            </div>
+          </div>
+
+          <label class="home-field">
+            <span>Minimum pass percentage</span>
+            <div class="percentage-input">
+              <input type="number" name="pass_pct" value="{{ default_pass }}" min="1" max="100" step="0.5" required>
+              <span>%</span>
+            </div>
+          </label>
+
+          <label class="subject-check">
+            <input type="checkbox" name="per_subject">
+            <span>
+              <strong>Require passing marks in every subject</strong>
+              <small>A student must meet the pass percentage in each individual subject.</small>
+            </span>
+          </label>
+
+          <button class="calculate-button" type="submit">Calculate class results <span>→</span></button>
+          {% if sample_available %}
+            <button class="sample-button" type="submit" name="use_sample" value="1" formnovalidate>Try with sample data</button>
+          {% endif %}
+        </section>
+
+        <aside class="home-panel">
+          <div class="panel-heading">
+            <span class="step-number guide-step">03</span>
+            <div>
+              <h3>File format guide</h3>
+              <p>Make sure your Excel sheet contains the required columns.</p>
+            </div>
+          </div>
+
+          <div class="format-box">
+            <div class="format-top">
+              <span>📊</span>
+              <strong>Required Excel columns</strong>
+              <span class="format-label">.XLSX FILE</span>
+            </div>
+            <div class="chips">
+              <span class="chip">RollNo</span>
+              <span class="chip">Name</span>
+              {% for s in subjects %}<span class="chip">{{ s }}</span>{% endfor %}
+            </div>
+            <p class="format-note">Use these exact column headings in your spreadsheet. Title rows above the header row are allowed. Marks should be entered out of 100 for each subject.</p>
+          </div>
+
+          <div class="grade-heading">
+            <div>
+              <h3>Grade scale</h3>
+              <p>Grade bands used by the portal</p>
+            </div>
+            <span>🏅</span>
+          </div>
+          <div class="grade-list">
+            <div class="grade-row"><span class="grade-badge grade-a-plus">A+</span><span>Excellent</span><strong>90% and above</strong></div>
+            <div class="grade-row"><span class="grade-badge grade-a">A</span><span>Very good</span><strong>80–89%</strong></div>
+            <div class="grade-row"><span class="grade-badge grade-b-plus">B+</span><span>Good</span><strong>70–79%</strong></div>
+            <div class="grade-row"><span class="grade-badge grade-b">B</span><span>Above average</span><strong>60–69%</strong></div>
+            <div class="grade-row"><span class="grade-badge grade-c">C</span><span>Average</span><strong>50–59%</strong></div>
+            <div class="grade-row"><span class="grade-badge grade-d">D</span><span>Pass band</span><strong>Pass mark–49%</strong></div>
+            <div class="grade-row"><span class="grade-badge grade-f">F</span><span>Needs improvement</span><strong>Below pass mark</strong></div>
+          </div>
+          <div class="guide-tip"><span>💡</span><span><strong>Quick tip:</strong> Existing Total, Percentage, Grade and Result columns are ignored. The portal recalculates these values from the subject marks.</span></div>
+        </aside>
+      </div>
+    </form>
+  </section>
+
+  <section class="home-bottom">
+    <div><span>✨</span><strong>Everything you need, in one place.</strong><p>Analyse marks, understand class performance and prepare student reports with less manual work.</p></div>
+  </section>
 </div>
+
+<script>
+(function () {
+  const views = {
+    overview: { title: 'Performance snapshot', hint: 'Illustrative class average across key areas', metrics: ['120', '76.4%', '92%'], bars: [['English',76],['Maths',68],['Science',82],['Computer',88],['Hindi',70]] },
+    grades: { title: 'Grade distribution', hint: 'Example mix of grades in a class', metrics: ['120', '76.4%', '92%'], bars: [['A / A+',82],['B+ / B',74],['C',58],['D',36],['F',14]] },
+    subjects: { title: 'Subject comparison', hint: 'Compare sample averages subject by subject', metrics: ['5', '76.8%', '—'], bars: [['English',76],['Maths',68],['Science',82],['Computer',88],['Hindi',70]] }
+  };
+  const tabs = document.querySelectorAll('.preview-tab');
+  const bars = document.getElementById('previewBars');
+  if (tabs.length && bars) {
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        const data = views[tab.dataset.view];
+        if (!data) return;
+        tabs.forEach(function (item) {
+          const active = item === tab;
+          item.classList.toggle('is-active', active);
+          item.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+        document.getElementById('previewChartTitle').textContent = data.title;
+        document.getElementById('previewChartHint').textContent = data.hint;
+        document.querySelector('[data-metric="students"]').textContent = data.metrics[0];
+        document.querySelector('[data-metric="average"]').textContent = data.metrics[1];
+        document.querySelector('[data-metric="pass"]').textContent = data.metrics[2];
+        bars.innerHTML = '';
+        data.bars.forEach(function (item, index) {
+          const bar = document.createElement('div');
+          bar.className = 'preview-bar-item';
+          const track = document.createElement('div'); track.className = 'preview-bar-track';
+          const fill = document.createElement('i'); fill.style.height = item[1] + '%';
+          fill.style.animationDelay = (index * 55) + 'ms';
+          const label = document.createElement('span'); label.textContent = item[0];
+          track.appendChild(fill); bar.appendChild(track); bar.appendChild(label); bars.appendChild(bar);
+        });
+        bars.setAttribute('aria-label', data.title + ' sample chart');
+      });
+    });
+  }
+})();
+
+(function () {
+  const input = document.getElementById('excelFile');
+  const zone = document.getElementById('uploadZone');
+  const selected = document.getElementById('selectedFile');
+  const fileName = document.getElementById('fileName');
+  const clear = document.getElementById('clearFile');
+  if (!input || !zone) return;
+
+  function showFile(file) {
+    if (!file) {
+      selected.classList.remove('visible');
+      fileName.textContent = '';
+      zone.classList.remove('file-loaded');
+      return;
+    }
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      alert('Please choose an Excel .xlsx file.'); input.value = ''; return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Please choose a file smaller than 5 MB.'); input.value = ''; return;
+    }
+    fileName.textContent = file.name;
+    selected.classList.add('visible');
+    zone.classList.add('file-loaded');
+  }
+
+  input.addEventListener('change', function () { showFile(input.files[0]); });
+  clear.addEventListener('click', function () {
+    input.value = '';
+    showFile(null);
+  });
+
+  ['dragenter', 'dragover'].forEach(function (eventName) {
+    zone.addEventListener(eventName, function (event) {
+      event.preventDefault();
+      zone.classList.add('drag-active');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (eventName) {
+    zone.addEventListener(eventName, function (event) {
+      event.preventDefault();
+      zone.classList.remove('drag-active');
+    });
+  });
+  zone.addEventListener('drop', function (event) {
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      alert('Please choose an Excel .xlsx file.');
+      return;
+    }
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    showFile(file);
+  });
+})();
+</script>
 {% endblock %}
