@@ -24,31 +24,46 @@
   <div class="alert warn">{{ warning }}</div>
 {% endfor %}
 
+<div class="results-toolbar no-image">
+  <div>
+    <span class="live-dot"></span>
+    <span>Class overview</span>
+    <span class="toolbar-note">Your results, at a glance</span>
+  </div>
+  <button class="btn theme-button" type="button" id="themeToggle" aria-pressed="false">☾ Dark view</button>
+</div>
+
 <div id="captureArea" class="capture-area">
   <div class="capture-title">
-    <div class="capture-brand">🎓 Student Grade Portal</div>
-    <div class="capture-subtitle">Class Performance & Student Results</div>
+    <div>
+      <div class="capture-brand">✦ Student Grade Portal</div>
+      <div class="capture-subtitle">Class Performance & Student Results</div>
+    </div>
+    <div class="report-chip">CLASS REPORT</div>
   </div>
 
   <section class="stats">
-    <div class="stat"><span>Total Students</span><b>{{ st["Number of Students"] }}</b></div>
-    <div class="stat"><span>Class Average</span><b>{{ "%.2f"|format(st["Class Average %"]) }}%</b></div>
+    <div class="stat stat-indigo"><span>Total Students</span><b>{{ st["Number of Students"] }}</b><small>Students assessed</small></div>
+    <div class="stat stat-cyan"><span>Class Average</span><b>{{ "%.2f"|format(st["Class Average %"]) }}%</b><small>Overall performance</small></div>
+    <div class="stat stat-green"><span>Passed</span><b>{{ st["Pass Count"] }}</b><small>Successful students</small></div>
+    <div class="stat stat-rose"><span>Failed</span><b>{{ st["Fail Count"] }}</b><small>Need more support</small></div>
     <div class="stat"><span>Highest Percentage</span><b>{{ "%.2f"|format(st["Highest %"]) }}%</b></div>
     <div class="stat"><span>Lowest Percentage</span><b>{{ "%.2f"|format(st["Lowest %"]) }}%</b></div>
-    <div class="stat good"><span>Passed</span><b>{{ st["Pass Count"] }}</b></div>
-    <div class="stat bad"><span>Failed</span><b>{{ st["Fail Count"] }}</b></div>
     <div class="stat"><span>Pass Rate</span><b>{{ "%.2f"|format(st["Pass %"]) }}%</b></div>
     <div class="stat"><span>Class Topper</span><b class="small">{{ st["Class Topper"] }}</b></div>
   </section>
 
   <div class="grid-2">
     <section class="card">
-      <h2>🏆 Top Performers</h2>
+      <div class="card-heading">
+        <div><span class="section-kicker">HIGHLIGHTS</span><h2>🏆 Top Performers</h2></div>
+        <span class="mini-tag">TOP 3</span>
+      </div>
       <ol class="top">
         {% for t in a.top3 %}
           <li>
-            <span>{{ t.Name }}</span>
-            <span><b>{{ "%.2f"|format(t.Percentage) }}%</b>
+            <span class="performer-name">{{ t.Name }}</span>
+            <span class="performer-score"><b>{{ "%.2f"|format(t.Percentage) }}%</b>
               <span class="badge g-{{ t.Grade|replace('+','p') }}">{{ t.Grade }}</span>
             </span>
           </li>
@@ -57,7 +72,9 @@
     </section>
 
     <section class="card">
-      <h2>Grade Distribution</h2>
+      <div class="card-heading">
+        <div><span class="section-kicker">CLASS BREAKDOWN</span><h2>Grade Distribution</h2></div>
+      </div>
       {% set mx = a.grade_counts.max() or 1 %}
       {% for grade, count in a.grade_counts.items() %}
         <div class="bar-row">
@@ -70,11 +87,11 @@
   </div>
 
   <section class="card">
-    <div class="section-heading">
-      <div>
-        <h2>Class Performance Charts</h2>
+    <div class="card-heading">
+      <div><span class="section-kicker">VISUAL ANALYSIS</span><h2>Class Performance Charts</h2>
         <p class="muted">Student-wise percentage and subject-wise class average</p>
       </div>
+      <span class="chart-icon">↗</span>
     </div>
     <img class="chart" alt="Student-wise percentage and subject-wise class average charts"
          src="data:image/png;base64,{{ a.chart }}">
@@ -83,11 +100,12 @@
   <section class="card">
     <div class="head-row">
       <div>
+        <span class="section-kicker">INDIVIDUAL RECORDS</span>
         <h2>Student Results</h2>
-        <p class="muted">Select a student's name to view their report card.</p>
+        <p class="muted">Search, filter, or sort the class records. Select a student's name to view their report card.</p>
       </div>
       <div class="filters no-print">
-        <input id="search" type="search" placeholder="Search name or roll number…">
+        <input id="search" type="search" placeholder="Search name or roll number…" aria-label="Search students">
         <select id="resultFilter" aria-label="Filter by result">
           <option value="">All Results</option>
           <option value="Pass">Pass</option>
@@ -99,6 +117,7 @@
             <option value="{{ grade }}">{{ grade }}</option>
           {% endfor %}
         </select>
+        <button class="btn clear-button" type="button" id="clearFilters">Clear filters</button>
       </div>
     </div>
 
@@ -128,16 +147,18 @@
         </tbody>
       </table>
     </div>
-    <p id="rowCount" class="table-note"></p>
+    <div class="table-bottom"><p id="rowCount" class="table-note"></p><span class="table-hint">Tip: use the filters to narrow the list</span></div>
   </section>
 
   <section class="card">
-    <h2>Subject-wise Class Average</h2>
+    <div class="card-heading">
+      <div><span class="section-kicker">SUBJECT INSIGHTS</span><h2>Subject-wise Class Average</h2></div>
+    </div>
     <div class="subject-average-grid">
       {% for subject in subjects %}
       <div class="subject-average">
         <span>{{ subject }}</span>
-        <strong>{{ "%.2f"|format(a.subject_avg[subject]) }}</strong>
+        <strong>{{ "%.2f"|format(a.subject_avg[subject]) }}%</strong>
         <div class="average-track">
           <div style="width: {{ a.subject_avg[subject] }}%"></div>
         </div>
@@ -156,6 +177,7 @@
   const gradeFilter = document.getElementById("gradeFilter");
   const rows = [...document.querySelectorAll("#resultsTable tbody tr")];
   const rowCount = document.getElementById("rowCount");
+  const table = document.getElementById("resultsTable");
 
   function applyFilters() {
     const query = search.value.trim().toLowerCase();
@@ -177,7 +199,49 @@
   [search, resultFilter, gradeFilter].forEach(control => {
     control.addEventListener(control.tagName === "INPUT" ? "input" : "change", applyFilters);
   });
+
+  document.getElementById("clearFilters").addEventListener("click", () => {
+    search.value = "";
+    resultFilter.value = "";
+    gradeFilter.value = "";
+    applyFilters();
+  });
+
+  // Click a table heading to sort that column.
+  table.querySelectorAll("thead th").forEach((heading, columnIndex) => {
+    heading.classList.add("sortable");
+    heading.title = "Click to sort";
+    heading.addEventListener("click", () => {
+      const tbody = table.querySelector("tbody");
+      const ascending = heading.dataset.sort !== "asc";
+      table.querySelectorAll("thead th").forEach(th => {
+        th.dataset.sort = "";
+        th.removeAttribute("aria-sort");
+      });
+      heading.dataset.sort = ascending ? "asc" : "desc";
+      heading.setAttribute("aria-sort", ascending ? "ascending" : "descending");
+
+      const sorted = [...tbody.querySelectorAll("tr")].sort((a, b) => {
+        const first = a.children[columnIndex].innerText.trim().replace("%", "");
+        const second = b.children[columnIndex].innerText.trim().replace("%", "");
+        const n1 = Number(first), n2 = Number(second);
+        const comparison = !Number.isNaN(n1) && !Number.isNaN(n2)
+          ? n1 - n2
+          : first.localeCompare(second, undefined, { numeric: true, sensitivity: "base" });
+        return ascending ? comparison : -comparison;
+      });
+      sorted.forEach(row => tbody.appendChild(row));
+    });
+  });
+
   applyFilters();
+
+  document.getElementById("themeToggle").addEventListener("click", event => {
+    const area = document.getElementById("captureArea");
+    const dark = area.classList.toggle("dark-view");
+    event.currentTarget.textContent = dark ? "☀ Light view" : "☾ Dark view";
+    event.currentTarget.setAttribute("aria-pressed", String(dark));
+  });
 
   document.getElementById("downloadImage").addEventListener("click", async () => {
     const button = document.getElementById("downloadImage");
@@ -192,7 +256,7 @@
       const canvas = await html2canvas(area, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#f5f6fb",
+        backgroundColor: getComputedStyle(area).backgroundColor,
         windowWidth: Math.max(document.documentElement.scrollWidth, 1200),
         scrollY: 0
       });
