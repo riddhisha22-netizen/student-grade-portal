@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Class Dashboard · Student Grade Portal{% endblock %}
+{% block content %}
+{% set st = a.stats %}
+{% set total = st["Number of Students"]|int %}
+{% set passed = st["Pass Count"]|int %}
+{% set failed = st["Fail Count"]|int %}
+{% set avg = st["Class Average %"]|float %}
+<style>
+/* Results dashboard only — deliberately scoped so the homepage and shared theme stay untouched. */
+.results-dashboard{--rd-blue:#2186e8;--rd-ink:#202b3b;--rd-muted:#748094;--rd-line:#e5eaf1;--rd-soft:#f5f8fc;color:var(--rd-ink)}
+.results-dashboard *{box-sizing:border-box}.rd-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin:12px 0 22px}.rd-eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;color:#748094;text-transform:uppercase;margin:0 0 7px}.rd-heading h1{font-size:clamp(25px,3vw,34px);letter-spacing:-.04em;margin:0 0 7px;color:#202b3b}.rd-subtitle{margin:0;color:var(--rd-muted);font-size:14px}.rd-actions{display:flex;gap:9px;flex-wrap:wrap}.rd-actions .btn{white-space:nowrap}.rd-section{margin:22px 0}.rd-section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.rd-section-head h2{font-size:19px;margin:0;letter-spacing:-.02em}.rd-section-head p{font-size:13px;color:var(--rd-muted);margin:4px 0 0}.rd-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.rd-kpi{background:#fff;border:1px solid var(--rd-line);border-radius:15px;padding:17px 18px;box-shadow:0 4px 14px rgba(32,55,88,.035);min-width:0}.rd-kpi-top{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--rd-muted);font-size:12px;font-weight:750;text-transform:uppercase;letter-spacing:.045em}.rd-kpi-icon{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:#edf5ff;color:#1677d2;font-size:16px}.rd-kpi strong{display:block;font-size:29px;line-height:1.15;letter-spacing:-.045em;margin:12px 0 5px}.rd-kpi small{color:var(--rd-muted);font-size:12px}.rd-kpi.good .rd-kpi-icon{background:#e9f8ef;color:#16834b}.rd-kpi.bad .rd-kpi-icon{background:#fff0ef;color:#d84a43}.rd-kpi.accent strong{color:#1677d2}.rd-progress{height:7px;border-radius:99px;background:#edf1f6;overflow:hidden;margin-top:12px}.rd-progress span{display:block;height:100%;border-radius:99px;background:#2186e8}.rd-progress .green{background:#20a56a}.rd-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}.rd-panel{background:#fff;border:1px solid var(--rd-line);border-radius:16px;padding:19px;box-shadow:0 4px 14px rgba(32,55,88,.035);min-width:0}.rd-panel h3{font-size:16px;margin:0 0 4px}.rd-panel .rd-help{font-size:12px;color:var(--rd-muted);margin:0 0 16px}.rd-grade-list{display:grid;gap:11px}.rd-grade-row{display:grid;grid-template-columns:43px 1fr 28px;align-items:center;gap:10px;font-size:13px}.rd-grade-pill{display:inline-flex;justify-content:center;align-items:center;padding:4px 7px;border-radius:7px;font-weight:800;background:#eaf3ff;color:#176fc3}.rd-grade-track{height:10px;background:#eff2f6;border-radius:99px;overflow:hidden}.rd-grade-track span{height:100%;display:block;background:linear-gradient(90deg,#2186e8,#60b2ff);border-radius:99px}.rd-grade-count{text-align:right;font-weight:750}.rd-performers{display:grid;gap:9px}.rd-performer{display:flex;align-items:center;gap:11px;padding:10px 11px;background:#f8faff;border:1px solid #edf1f6;border-radius:11px}.rd-rank{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#fff0cf;color:#936400;font-weight:850;font-size:13px}.rd-performer:nth-child(2) .rd-rank{background:#edf1f6;color:#5b687a}.rd-performer:nth-child(3) .rd-rank{background:#f8e8dc;color:#955a31}.rd-performer-name{font-weight:750;font-size:13px;flex:1;min-width:0}.rd-performer-meta{font-size:11px;color:var(--rd-muted);margin-top:2px}.rd-score{font-weight:850;font-size:14px;white-space:nowrap}.rd-subjects{display:grid;gap:13px}.rd-subject-row{display:grid;grid-template-columns:minmax(90px,150px) 1fr 54px;gap:10px;align-items:center;font-size:13px}.rd-subject-name{font-weight:650;overflow-wrap:anywhere}.rd-subject-track{height:10px;border-radius:99px;background:#eff2f6;overflow:hidden}.rd-subject-track span{height:100%;display:block;border-radius:99px;background:linear-gradient(90deg,#2186e8,#75bdff)}.rd-subject-value{text-align:right;font-weight:800}.rd-chart-img{display:block;width:100%;height:auto;max-height:440px;object-fit:contain;border-radius:10px}.rd-table-panel{padding:0;overflow:hidden}.rd-table-head{padding:19px 19px 14px}.rd-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.rd-search{min-width:210px;flex:1;max-width:340px}.rd-search input,.rd-tools select{width:100%;padding:10px 12px;border:1px solid #dfe5ee;border-radius:10px;background:#fff;color:#263244;font:inherit;font-size:13px;outline:none}.rd-search input:focus,.rd-tools select:focus{border-color:#2186e8;box-shadow:0 0 0 3px rgba(33,134,232,.12)}.rd-tools select{width:auto;min-width:125px}.rd-filter-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.rd-chip{border:1px solid #e1e7ef;background:#fff;color:#687589;padding:6px 10px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer}.rd-chip.active{background:#eaf4ff;border-color:#b8d9fb;color:#126fc5}.rd-table-wrap{overflow:auto;border-top:1px solid var(--rd-line)}.rd-table{width:100%;border-collapse:separate;border-spacing:0;white-space:nowrap;font-size:13px}.rd-table th{position:sticky;top:0;background:#f7f9fc;color:#6d7889;font-size:11px;text-transform:uppercase;letter-spacing:.045em;text-align:left;padding:12px 13px;border-bottom:1px solid var(--rd-line);cursor:pointer;user-select:none}.rd-table th:first-child,.rd-table td:first-child{padding-left:19px}.rd-table td{padding:12px 13px;border-bottom:1px solid #eef1f5}.rd-table tbody tr:hover{background:#f8fbff}.rd-table tbody tr:last-child td{border-bottom:0}.rd-student-link{font-weight:750;color:#176fc3;text-decoration:none}.rd-student-link:hover{text-decoration:underline}.rd-result{display:inline-flex;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:800}.rd-result.pass{background:#e8f8ef;color:#16834b}.rd-result.fail{background:#fff0ef;color:#cf4942}.rd-grade{display:inline-flex;padding:4px 8px;border-radius:7px;background:#edf4ff;color:#176fc3;font-weight:800;font-size:11px}.rd-empty{text-align:center!important;padding:30px!important;color:var(--rd-muted)}.rd-table-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 19px;border-top:1px solid var(--rd-line);font-size:12px;color:var(--rd-muted)}.rd-mini-btn{border:1px solid #dfe5ee;background:#fff;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:#354257}.rd-mini-btn:hover{background:#f4f8fd}.rd-warning{margin:10px 0}.rd-tip{font-size:12px;color:var(--rd-muted);margin:10px 0 0}
+@media(max-width:900px){.rd-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.rd-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.rd-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.rd-kpi{padding:13px}.rd-kpi strong{font-size:24px}.rd-heading{margin-top:6px}.rd-actions{width:100%}.rd-actions .btn{flex:1;text-align:center}.rd-panel{padding:15px}.rd-table-head{padding:15px}.rd-search{max-width:none;min-width:100%}.rd-tools select{flex:1}.rd-subject-row{grid-template-columns:90px 1fr 45px}}
+@media print{.results-dashboard .no-print{display:none!important}.rd-panel,.rd-kpi{box-shadow:none;break-inside:avoid}.rd-table-wrap{overflow:visible}.rd-table th{position:static}}
+</style>
+<div class="results-dashboard">
+  <div class="rd-heading">
+    <div>
+      <p class="rd-eyebrow">Student Grade Portal / Analytics</p>
+      <h1>Class performance dashboard</h1>
+      <p class="rd-subtitle">{{ a.filename }} · Pass mark {{ "%g"|format(a.pass_pct) }}%{% if a.per_subject %} · every subject must be passed{% endif %}</p>
+    </div>
+    <div class="rd-actions no-print">
+      <a class="btn primary" href="{{ url_for('download', token=token, kind='excel') }}">⬇ Download Excel</a>
+      <a class="btn" href="{{ url_for('download', token=token, kind='csv') }}">⬇ CSV</a>
+      <a class="btn" href="{{ url_for('download', token=token, kind='chart') }}">⬇ Charts</a>
+      <a class="btn" href="{{ url_for('index') }}">＋ New upload</a>
+    </div>
+  </div>
+  {% for w in a.warnings %}<div class="alert warn rd-warning">{{ w }}</div>{% endfor %}
+
+  <section class="rd-section">
+    <div class="rd-section-head"><div><h2>Class at a glance</h2><p>Key indicators calculated from the uploaded class sheet</p></div></div>
+    <div class="rd-kpis">
+      <article class="rd-kpi"><div class="rd-kpi-top"><span>Total students</span><span class="rd-kpi-icon">♙</span></div><strong>{{ total }}</strong><small>Students assessed</small></article>
+      <article class="rd-kpi accent"><div class="rd-kpi-top"><span>Class average</span><span class="rd-kpi-icon">◉</span></div><strong>{{ "%.2f"|format(avg) }}%</strong><small>Overall class performance</small><div class="rd-progress"><span style="width:{{ [avg,100]|min }}%"></span></div></article>
+      <article class="rd-kpi good"><div class="rd-kpi-top"><span>Passed</span><span class="rd-kpi-icon">✓</span></div><strong>{{ passed }}</strong><small>{{ "%.1f"|format(passed / total * 100 if total else 0) }}% of students</small><div class="rd-progress"><span class="green" style="width:{{ passed / total * 100 if total else 0 }}%"></span></div></article>
+      <article class="rd-kpi bad"><div class="rd-kpi-top"><span>Need support</span><span class="rd-kpi-icon">!</span></div><strong>{{ failed }}</strong><small>{{ "%.1f"|format(failed / total * 100 if total else 0) }}% of students</small><div class="rd-progress"><span style="width:{{ failed / total * 100 if total else 0 }}%;background:#e36a63"></span></div></article>
+      <article class="rd-kpi"><div class="rd-kpi-top"><span>Pass rate</span><span class="rd-kpi-icon">↗</span></div><strong>{{ "%.2f"|format(st["Pass %"]|float) }}%</strong><small>Successful students</small><div class="rd-progress"><span class="green" style="width:{{ [st['Pass %']|float,100]|min }}%"></span></div></article>
+      <article class="rd-kpi"><div class="rd-kpi-top"><span>Highest score</span><span class="rd-kpi-icon">★</span></div><strong>{{ "%g"|format(st["Highest %"]) }}%</strong><small>Top class percentage</small></article>
+      <article class="rd-kpi"><div class="rd-kpi-top"><span>Lowest score</span><span class="rd-kpi-icon">⌄</span></div><strong>{{ "%g"|format(st["Lowest %"]) }}%</strong><small>Lowest class percentage</small></article>
+      <article class="rd-kpi"><div class="rd-kpi-top"><span>Class topper</span><span class="rd-kpi-icon">🏆</span></div><strong style="font-size:19px;letter-spacing:-.02em">{{ st["Class Topper"] }}</strong><small>Highest overall percentage</small></article>
+    </div>
+  </section>
+
+  <section class="rd-section rd-grid">
+    <article class="rd-panel"><h3>Grade distribution</h3><p class="rd-help">How students are spread across grade bands</p>
+      <div class="rd-grade-list">
+      {% set mx = a.grade_counts.max() or 1 %}
+      {% for g,n in a.grade_counts.items() %}
+        <div class="rd-grade-row"><span class="rd-grade-pill">{{ g }}</span><div class="rd-grade-track"><span style="width:{{ (n / mx * 100)|round(1) }}%"></span></div><span class="rd-grade-count">{{ n }}</span></div>
+      {% endfor %}
+      </div>
+    </article>
+    <article class="rd-panel"><h3>Top performers</h3><p class="rd-help">Leading students ranked by overall percentage</p>
+      <div class="rd-performers">
+      {% for t in a.top3 %}<div class="rd-performer"><span class="rd-rank">{{ loop.index }}</span><div style="min-width:0;flex:1"><div class="rd-performer-name">{{ t.Name }}</div><div class="rd-performer-meta">Grade {{ t.Grade }}</div></div><span class="rd-score">{{ "%g"|format(t.Percentage) }}%</span></div>{% else %}<p class="rd-help">No student records available.</p>{% endfor %}
+      </div>
+    </article>
+  </section>
+
+  <section class="rd-section rd-grid">
+    <article class="rd-panel"><h3>Subject-wise class average</h3><p class="rd-help">Average marks by subject (out of 100)</p>
+      <div class="rd-subjects">
+      {% for s in subjects %}{% set v = a.subject_avg[s]|float %}<div class="rd-subject-row"><span class="rd-subject-name">{{ s }}</span><div class="rd-subject-track"><span style="width:{{ [v,100]|min }}%"></span></div><span class="rd-subject-value">{{ "%g"|format(v) }}%</span></div>{% endfor %}
+      </div>
+    </article>
+    <article class="rd-panel"><h3>Performance charts</h3><p class="rd-help">Class performance overview generated from your spreadsheet</p><img class="rd-chart-img" src="data:image/png;base64,{{ a.chart }}" alt="Class performance charts"></article>
+  </section>
+
+  <section class="rd-section rd-panel rd-table-panel">
+    <div class="rd-table-head">
+      <div class="rd-section-head"><div><h2>Student results</h2><p>Search, filter and sort the class list. Select a student to view their report card.</p></div><button class="rd-mini-btn no-print" id="exportVisible" type="button">⇩ Export filtered CSV</button></div>
+      <div class="rd-tools no-print"><label class="rd-search"><input id="rdSearch" type="search" placeholder="Search student name or roll number…" aria-label="Search students"></label><select id="rdResult" aria-label="Filter by result"><option value="">All results</option><option value="Pass">Passed</option><option value="Fail">Needs support</option></select><select id="rdGrade" aria-label="Filter by grade"><option value="">All grades</option>{% for g in a.grade_counts.index %}<option value="{{ g }}">Grade {{ g }}</option>{% endfor %}</select><select id="rdSort" aria-label="Sort students"><option value="rank">Sort: Rank</option><option value="name">Name A–Z</option><option value="percentage-desc">Highest percentage</option><option value="percentage-asc">Lowest percentage</option></select></div>
+      <div class="rd-filter-chips no-print"><button class="rd-chip active" data-quick="all" type="button">Everyone ({{ total }})</button><button class="rd-chip" data-quick="Pass" type="button">Passed ({{ passed }})</button><button class="rd-chip" data-quick="Fail" type="button">Needs support ({{ failed }})</button></div>
+    </div>
+    <div class="rd-table-wrap"><table class="rd-table" id="rdTable"><thead><tr><th data-key="rank">Rank ↕</th><th data-key="roll">Roll no. ↕</th><th data-key="name">Student ↕</th>{% for s in subjects %}<th>{{ s }}</th>{% endfor %}<th data-key="total">Total</th><th data-key="percentage">Percentage ↕</th><th>Grade</th><th>Result</th></tr></thead><tbody>
+      {% for i,r in a.df.iterrows() %}<tr data-result="{{ r.Result }}" data-grade="{{ r.Grade }}" data-name="{{ r.Name|lower }}" data-roll="{{ r.RollNo }}" data-rank="{{ r.Rank }}" data-percentage="{{ r.Percentage }}" data-total="{{ r.Total }}"><td>{{ r.Rank }}</td><td>{{ r.RollNo }}</td><td><a class="rd-student-link" href="{{ url_for('report', token=token, idx=i) }}">{{ r.Name }}</a></td>{% for s in subjects %}<td>{{ "%g"|format(r[s]) }}</td>{% endfor %}<td>{{ "%g"|format(r.Total) }}</td><td><b>{{ "%g"|format(r.Percentage) }}%</b></td><td><span class="rd-grade">{{ r.Grade }}</span></td><td><span class="rd-result {{ 'pass' if r.Result == 'Pass' else 'fail' }}">{{ r.Result }}</span></td></tr>{% endfor %}
+    </tbody></table></div>
+    <div class="rd-table-foot"><span id="rdCount">Showing {{ total }} of {{ total }} students</span><span class="no-print">Tip: click a column heading to sort it.</span></div>
+  </section>
+  <p class="rd-tip">Data shown here is calculated from the uploaded file. Use the download buttons above to save the complete results.</p>
+</div>
+<script>
+(() => {
+  const table = document.getElementById('rdTable'); if (!table) return;
+  const body = table.tBodies[0], rows = Array.from(body.rows);
+  const search = document.getElementById('rdSearch'), result = document.getElementById('rdResult'), grade = document.getElementById('rdGrade'), sort = document.getElementById('rdSort'), count = document.getElementById('rdCount');
+  let quick = '', sortKey = 'rank', direction = 1;
+  function apply(){
+    const q = search.value.trim().toLowerCase(); let shown = 0;
+    rows.forEach(row => { const matches = (!q || row.textContent.toLowerCase().includes(q)) && (!result.value || row.dataset.result === result.value) && (!grade.value || row.dataset.grade === grade.value) && (!quick || row.dataset.result === quick); row.hidden = !matches; if(matches) shown++; });
+    count.textContent = `Showing ${shown} of ${rows.length} students`;
+  }
+  function sortRows(key, dir){
+    const keys = {rank:'rank',roll:'roll',name:'name',percentage:'percentage',total:'total'};
+    rows.sort((a,b)=>{let x=a.dataset[keys[key]],y=b.dataset[keys[key]]; if(key==='name') return x.localeCompare(y)*dir; return (Number(x)-Number(y))*dir;}).forEach(row=>body.appendChild(row)); apply();
+  }
+  [search,result,grade].forEach(el=>el.addEventListener('input',()=>{quick='';document.querySelectorAll('.rd-chip').forEach(c=>c.classList.toggle('active',c.dataset.quick==='all'));apply();}));
+  sort.addEventListener('change',()=>{const v=sort.value; if(v==='name')sortRows('name',1);else if(v==='percentage-desc')sortRows('percentage',-1);else if(v==='percentage-asc')sortRows('percentage',1);else sortRows('rank',1);});
+  document.querySelectorAll('.rd-chip').forEach(chip=>chip.addEventListener('click',()=>{quick=chip.dataset.quick==='all'?'':chip.dataset.quick;result.value='';document.querySelectorAll('.rd-chip').forEach(c=>c.classList.toggle('active',c===chip));apply();}));
+  table.querySelectorAll('th[data-key]').forEach(th=>th.addEventListener('click',()=>{const key=th.dataset.key;direction=sortKey===key?-direction:(key==='name'?1:-1);sortKey=key;sortRows(key,direction);}));
+  document.getElementById('exportVisible').addEventListener('click',()=>{const visible=rows.filter(r=>!r.hidden);const csvRows=[Array.from(table.tHead.rows[0].cells).map(c=>c.textContent.trim()),...visible.map(r=>Array.from(r.cells).map(c=>c.innerText.trim()))];const csv=csvRows.map(row=>row.map(v=>'"'+v.replace(/"/g,'""')+'"').join(',')).join('\r\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='filtered_student_results.csv';a.click();URL.revokeObjectURL(url);});
+  apply();
+})();
+</script>
+{% endblock %}
